@@ -50,17 +50,23 @@ def main():
                 # print(f"Vehicle Speed Limit: {vehicle.get_speed_limit()}")
                 # print("-" * 80)
 
-                logging.debug(f"Vehicle ID: {vehicle.id}")
-                logging.debug(f"Vehicle Type: {vehicle.type_id}")
-                logging.debug(f"Vehicle Location: {vehicle.get_location()}")
-                logging.debug(f"Vehicle Velocity: {vehicle.get_velocity()}")
-                logging.debug(f"Vehicle Acceleration: {vehicle.get_acceleration()}")
-                logging.debug(f"Vehicle Angular Velocity: {vehicle.get_angular_velocity()}")
-                logging.debug(f"Vehicle Angular attributes: {vehicle.attributes}")
+                logging.debug(f"Vehicle_ID: {vehicle.id}")
+                logging.debug(f"Vehicle_Type: {vehicle.type_id}")
+                logging.debug(f"Vehicle_Location: {vehicle.get_location()}")
+                logging.debug(f"Vehicle_Velocity: {vehicle.get_velocity()}")
+                logging.debug(f"Vehicle_Acceleration: {vehicle.get_acceleration()}")
+                logging.debug(f"Vehicle_Angular_Velocity: {vehicle.get_angular_velocity()}")
+                logging.debug(f"Vehicle_Attributes: {vehicle.attributes}")
+
+                logging.debug(f"traffic_light: {vehicle.get_traffic_light()}")
+                logging.debug(f"traffic_light_state: {vehicle.get_traffic_light_state()}")
+                logging.debug(f"transform: {vehicle.get_transform()}")
+                logging.debug(f"wheel_steer_angle: {vehicle.get_wheel_steer_angle()}")
+
                 # 移除不存在的属性调用
                 # print(f"Vehicle Is Invincible: {vehicle.is_invincible}")
                 # print(f"Vehicle Is Destroyed: {vehicle.is_destroyed}")
-                logging.debug(f"Vehicle Speed Limit: {vehicle.get_speed_limit()}")
+                logging.debug(f"Vehicle_Speed_Limit: {vehicle.get_speed_limit()}")
 
                 logging.debug("-" * 40)
                 for key, value in inspect.getmembers(vehicle):
