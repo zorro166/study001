@@ -15,11 +15,23 @@ def main():
         world = client.get_world()
         blueprint_library = world.get_blueprint_library()
 
+        map_instance = world.get_map()
+
+
+
         # 配置日志级别、格式和文件名
-        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', filename='myapp1.log')
+        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', filename='myapp4.log')
 
         # 记录一条日志
         logging.debug('这是一条debug日志')
+        for key, value in inspect.getmembers(map_instance):
+            if not key.startswith('__'):
+                logging.debug(f"{key}: {value}")
+
+        logging.debug(f"map_crosswalks: {map_instance.get_crosswalks()}")
+
+        logging.debug("*" * 90)
+
 
         # 设置一个持续5分钟的计时器 5 * 60
         duration = 1 * 20
@@ -61,7 +73,14 @@ def main():
                 logging.debug(f"traffic_light: {vehicle.get_traffic_light()}")
                 logging.debug(f"traffic_light_state: {vehicle.get_traffic_light_state()}")
                 logging.debug(f"transform: {vehicle.get_transform()}")
-                logging.debug(f"wheel_steer_angle: {vehicle.get_wheel_steer_angle()}")
+                # 是否受到路灯影响
+                logging.debug(f"vehicle_is_at_traffic_light: {vehicle.is_at_traffic_light()}")
+                logging.debug(f"Vehicle_Velocity_value: {vehicle.get_velocity().length()}")
+                # 获取车辆控制信息
+                vehicle_control = vehicle.get_control()
+                # 获取方向盘的偏转角度
+                steering_angle = vehicle_control.steer
+                logging.debug(f"Vehicle_steering_angle: {steering_angle}")
 
                 # 移除不存在的属性调用
                 # print(f"Vehicle Is Invincible: {vehicle.is_invincible}")
