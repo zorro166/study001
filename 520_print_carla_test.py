@@ -14,13 +14,10 @@ def main():
         # 获取世界和蓝图库
         world = client.get_world()
         blueprint_library = world.get_blueprint_library()
-
         map_instance = world.get_map()
 
-
-
         # 配置日志级别、格式和文件名
-        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', filename='myapp4.log')
+        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', filename='myapp6.log')
 
         # 记录一条日志
         logging.debug('这是一条debug日志')
@@ -28,25 +25,37 @@ def main():
             if not key.startswith('__'):
                 logging.debug(f"{key}: {value}")
 
-        logging.debug(f"map_crosswalks: {map_instance.get_crosswalks()}")
+        
+        map_crosswalks = map_instance.get_crosswalks()
+        logging.debug(f"map_crosswalks_length: {len(map_crosswalks)}")
+        for crosswalk in map_crosswalks:
+            for key, value in inspect.getmembers(crosswalk):
+                    if not key.startswith('__'):
+                        logging.debug(f"{key}: {value}")
+
+            # 使用 "+" * 60 分隔每一个crosswalk的信息
+            logging.debug("+" * 60)
 
         logging.debug("*" * 90)
-
 
         # 设置一个持续5分钟的计时器 5 * 60
         duration = 1 * 20
         start_time = time.time()
 
+        step_time = 0.5
+
         while time.time() - start_time < duration:
+            # 时间信息
+            pt = time.time() - start_time
+            print(f"Time: {pt:.2f}s")
+            logging.debug(f"Time: {pt:.2f}s")
+
             # 获取所有车辆、行人和交通信号灯
             vehicles = world.get_actors().filter('vehicle.*')
             pedestrians = world.get_actors().filter('walker.pedestrian.*')
             traffic_lights = world.get_actors().filter('traffic.traffic_light')
 
             # 输出信息
-            pt = time.time() - start_time
-            print(f"Time: {pt:.2f}s")
-            logging.debug(f"Time: {pt:.2f}s")
             print(f"Vehicles: {len(vehicles)}")
             print(f"Pedestrians: {len(pedestrians)}")
             print(f"Traffic Lights: {len(traffic_lights)}")
@@ -73,6 +82,7 @@ def main():
                 logging.debug(f"traffic_light: {vehicle.get_traffic_light()}")
                 logging.debug(f"traffic_light_state: {vehicle.get_traffic_light_state()}")
                 logging.debug(f"transform: {vehicle.get_transform()}")
+                # logging.debug(f"wheel_steer_angle: {vehicle.get_wheel_steer_angle()}")
                 # 是否受到路灯影响
                 logging.debug(f"vehicle_is_at_traffic_light: {vehicle.is_at_traffic_light()}")
                 logging.debug(f"Vehicle_Velocity_value: {vehicle.get_velocity().length()}")
@@ -112,8 +122,11 @@ def main():
 
             # 使用 "*" * 80 分隔每一帧
             logging.debug("*" * 80)
+            
+            sleep_time = start_time + step_time + pt - time.time()
+            print(f"sleep_time: {sleep_time}")
             # 等待0.5秒
-            time.sleep(0.49)
+            time.sleep(sleep_time)
 
     finally:
         print('Done.')
