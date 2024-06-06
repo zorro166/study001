@@ -4,7 +4,6 @@ import logging
 import inspect
 
 
-
 def main():
     try:
         # 连接到CARLA服务器
@@ -17,7 +16,8 @@ def main():
         map_instance = world.get_map()
 
         # 配置日志级别、格式和文件名
-        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s', filename='myapp6.log')
+        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s',
+                            filename='myapp6.log')
 
         # 记录一条日志
         logging.debug('这是一条debug日志')
@@ -25,13 +25,13 @@ def main():
             if not key.startswith('__'):
                 logging.debug(f"{key}: {value}")
 
-        
         map_crosswalks = map_instance.get_crosswalks()
         logging.debug(f"map_crosswalks_length: {len(map_crosswalks)}")
+        logging.debug("+" * 70)
         for crosswalk in map_crosswalks:
             for key, value in inspect.getmembers(crosswalk):
-                    if not key.startswith('__'):
-                        logging.debug(f"{key}: {value}")
+                if not key.startswith('__'):
+                    logging.debug(f"{key}: {value}")
 
             # 使用 "+" * 60 分隔每一个crosswalk的信息
             logging.debug("+" * 60)
@@ -54,11 +54,13 @@ def main():
             vehicles = world.get_actors().filter('vehicle.*')
             pedestrians = world.get_actors().filter('walker.pedestrian.*')
             traffic_lights = world.get_actors().filter('traffic.traffic_light')
+            traffic_signs = world.get_actors().filter('traffic.sign.*', exclude_TrafficLight=True)
 
             # 输出信息
             print(f"Vehicles: {len(vehicles)}")
             print(f"Pedestrians: {len(pedestrians)}")
             print(f"Traffic Lights: {len(traffic_lights)}")
+            print(f"Traffic Signs: {len(traffic_signs)}")
 
             # 循环输出车辆信息
             for vehicle in vehicles:
@@ -108,21 +110,20 @@ def main():
             # 使用 "*" * 70 分隔车辆信息与信号灯信息
             logging.debug("*" * 70)
 
-
             # 循环输出交通信号灯信息
             for tls in traffic_lights:
-                
+                logging.debug(f"Location: {tls.get_location()}")
                 for key, value in inspect.getmembers(tls):
                     if not key.startswith('__'):
                         logging.debug(f"{key}: {value}")
-                # 使用 "+" * 40 分隔每一个信号灯信息            
+                # 使用 "+" * 40 分隔每一个信号灯信息
                 logging.debug("+" * 40)
 
             # 使用 "+" * 70 分隔信号灯信息
 
             # 使用 "*" * 80 分隔每一帧
             logging.debug("*" * 80)
-            
+
             sleep_time = start_time + step_time + pt - time.time()
             print(f"sleep_time: {sleep_time}")
             # 等待0.5秒
@@ -130,6 +131,7 @@ def main():
 
     finally:
         print('Done.')
+
 
 if __name__ == '__main__':
     main()
