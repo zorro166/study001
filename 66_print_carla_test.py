@@ -86,7 +86,9 @@ def main():
                 logging.debug(f"Vehicle_Angular_Velocity: {vehicle.get_angular_velocity()}")
                 logging.debug(f"traffic_light: {vehicle.get_traffic_light()}")
                 logging.debug(f"traffic_light_state: {vehicle.get_traffic_light_state()}")
-                logging.debug(f"transform: {vehicle.get_transform()}")
+                transform = vehicle.get_transform()
+                logging.debug(f"transform: {transform}")
+                logging.debug(f"forward_vector: {transform.get_forward_vector()}")
                 # logging.debug(f"wheel_steer_angle: {vehicle.get_wheel_steer_angle()}")
                 # 是否受到路灯影响
                 logging.debug(f"vehicle_is_at_traffic_light: {vehicle.is_at_traffic_light()}")
@@ -135,7 +137,14 @@ def main():
 
             # 循环输出行人
             for pedestrian in pedestrians:
-                logging.debug(f"Location: {pedestrian.get_location()}")
+                # 获取行人的位置
+                walker_location = pedestrian.get_location()
+                logging.debug(f"Location: {walker_location}")
+                # 使用行人的位置获取 Waypoint
+                waypoint = map_instance.get_waypoint(walker_location)
+                # 判断行人是否在道路上
+                is_walker_on_road = waypoint is not None
+                logging.debug(f"is_walker_on_road: {is_walker_on_road}")
                 for key, value in inspect.getmembers(pedestrian):
                     if not key.startswith('__'):
                         logging.debug(f"{key}: {value}")
