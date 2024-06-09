@@ -51,18 +51,18 @@ def main():
         #                 logging.debug(f"{key}: {value}")
         #         # 使用 "+" * 60 分隔每一个junctions的信息
         #         logging.debug("+" * 60)
-            
+
         # 创建一个字典来存储每个Waypoint的连接数
-        waypoint_connections ={}
+        waypoint_connections = {}
         # 遍历拓扑结构，统计每个Waypoint的连接数
         for waypoint_pair in topology:
             for waypoint in waypoint_pair:
-                if waypoint in waypoint_connections: 
-                    waypoint_connections[waypoint]+=1
-                else: 
-                    waypoint_connections[waypoint]=1
+                if waypoint in waypoint_connections:
+                    waypoint_connections[waypoint] += 1
+                else:
+                    waypoint_connections[waypoint] = 1
         # 识别连接数大于2的Waypoint作为交叉路口
-        intersections ={wp for wp, count in waypoint_connections.items()if count >2}
+        intersections = {wp for wp, count in waypoint_connections.items() if count > 2}
         for waypoint in intersections:
             for key, value in inspect.getmembers(waypoint):
                 if not key.startswith('__'):
@@ -77,12 +77,15 @@ def main():
         start_time = time.time()
 
         step_time = 0.5
-
+        cnt = 0
         while time.time() - start_time < duration:
             # 时间信息
             pt = time.time() - start_time
             print(f"Time: {pt:.2f}s")
-            logging.debug(f"Time: {pt:.2f}s")
+            logging.debug(f"Time_info: {pt:.2f}s")
+            logging.debug(f"Time: {pt:.2f}")
+            # 使用 "*" * 70 分隔时间与车辆信息
+            logging.debug("*" * 70)
 
             # 获取所有车辆、行人和交通信号灯
             vehicles = world.get_actors().filter('vehicle.*')
@@ -174,8 +177,8 @@ def main():
 
             # 使用 "*" * 80 分隔每一帧
             logging.debug("*" * 80)
-
-            sleep_time = start_time + step_time + pt - time.time()
+            cnt += 1
+            sleep_time = start_time + step_time * cnt - time.time()
             print(f"sleep_time: {sleep_time}")
             # 等待0.5秒
             time.sleep(sleep_time)
