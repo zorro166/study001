@@ -17,7 +17,7 @@ def main():
 
         # 配置日志级别、格式和文件名
         logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s',
-                            filename='myapp6.log')
+                            filename='myapp6.1.log')
 
         # 记录一条日志
         logging.debug('这是一条debug日志')
@@ -39,16 +39,36 @@ def main():
         # 分隔 junctions
         logging.debug("+" * 70)
         # 获取地图的拓扑结构
-        topology = map_crosswalks.get_topology()
+        topology = map_instance.get_topology()
         # 遍历交叉路口并打印信息
-        for waypoint in topology:
-            # 检查是否是交叉路口
-            if waypoint.is_junction:
-                for key, value in inspect.getmembers(waypoint):
-                    if not key.startswith('__'):
-                        logging.debug(f"{key}: {value}")
-                # 使用 "+" * 60 分隔每一个junctions的信息
-                logging.debug("+" * 60)
+        # for waypoint in topology:
+        #     print("waypoint:")
+        #     print(waypoint)
+        #     # 检查是否是交叉路口
+        #     if waypoint.is_junction:
+        #         for key, value in inspect.getmembers(waypoint):
+        #             if not key.startswith('__'):
+        #                 logging.debug(f"{key}: {value}")
+        #         # 使用 "+" * 60 分隔每一个junctions的信息
+        #         logging.debug("+" * 60)
+            
+        # 创建一个字典来存储每个Waypoint的连接数
+        waypoint_connections ={}
+        # 遍历拓扑结构，统计每个Waypoint的连接数
+        for waypoint_pair in topology:
+            for waypoint in waypoint_pair:
+                if waypoint in waypoint_connections: 
+                    waypoint_connections[waypoint]+=1
+                else: 
+                    waypoint_connections[waypoint]=1
+        # 识别连接数大于2的Waypoint作为交叉路口
+        intersections ={wp for wp, count in waypoint_connections.items()if count >2}
+        for waypoint in intersections:
+            for key, value in inspect.getmembers(waypoint):
+                if not key.startswith('__'):
+                    logging.debug(f"{key}: {value}")
+            # 使用 "+" * 60 分隔每一个junctions的信息
+            logging.debug("+" * 60)
 
         logging.debug("*" * 90)
 
@@ -68,7 +88,7 @@ def main():
             vehicles = world.get_actors().filter('vehicle.*')
             pedestrians = world.get_actors().filter('walker.pedestrian.*')
             traffic_lights = world.get_actors().filter('traffic.traffic_light')
-            traffic_signs = world.get_actors().filter('traffic.sign.*', exclude_TrafficLight=True)
+            traffic_signs = world.get_actors().filter('traffic.sign.*')
 
             # 输出信息
             print(f"Vehicles: {len(vehicles)}")
@@ -125,12 +145,13 @@ def main():
 
             # 循环输出交通标识
             for tls in traffic_signs:
-                logging.debug(f"Location: {tls.get_location()}")
-                for key, value in inspect.getmembers(tls):
-                    if not key.startswith('__'):
-                        logging.debug(f"{key}: {value}")
-                # 使用 "+" * 50 分隔每一个信号灯信息
-                logging.debug("+" * 50)
+                if tls['type_id'] != "traffic.traffic_light":
+                    logging.debug(f"Location: {tls.get_location()}")
+                    for key, value in inspect.getmembers(tls):
+                        if not key.startswith('__'):
+                            logging.debug(f"{key}: {value}")
+                    # 使用 "+" * 50 分隔每一个信号灯信息
+                    logging.debug("+" * 50)
 
             # 使用 "+" * 70 分隔交通标识信息
             logging.debug("*" * 70)
