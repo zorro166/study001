@@ -294,7 +294,8 @@ def buildMapObj(mapstring):
     crosswalks = []
     for crosswalk_log in crosswalks_log:
         crosswalk_obj = msg2obj(crosswalk_log)
-        crosswalks.append(crosswalk_obj)
+        if crosswalk_obj.get("x") is not None:
+            crosswalks.append(crosswalk_obj)
     map_obj['crosswalks'] = crosswalks
     # 处理交叉路口
     if len(mapstringarr) > 2:
@@ -479,6 +480,8 @@ def near_crosswalk(ego_loc, map):
     ego_y = ego_loc.get('y')
     for crosswalk in crosswalks:
         # print(lane_polygon)
+        print("crosswalk:")
+        print(crosswalk)
         dis = calc_dis(ego_x, ego_y, crosswalk.get('x'), crosswalk.get('y'))
         if dis < closet_dis:
             closet_dis = dis
@@ -490,20 +493,23 @@ def near_crosswalk(ego_loc, map):
 
 # 计算两个二维点之间的距离
 def calc_dis(x0, y0, x1, y1):
-    return math.sqrt((x1-x0)**2 + (y1-y0)**2)
+    return math.sqrt((float(x1)-float(x0))**2 + (float(y1)-float(y0))**2)
 
 
 def near_junction(ego_loc, map):
-    junctions = map['junctions']
-    ego_x = ego_loc.get('x')
-    closet_dis = 999999
-    ego_y = ego_loc.get('y')
-    for junction in junctions:
-        dis = calc_dis(ego_x, ego_y, junction.get('x'), junction.get('y'))
-        if dis < closet_dis:
-            closet_dis = dis
-    if closet_dis <= 3:
-        return 1
+    if "junctions" in map:
+        junctions = map['junctions']
+        ego_x = ego_loc.get('x')
+        closet_dis = 999999
+        ego_y = ego_loc.get('y')
+        for junction in junctions:
+            dis = calc_dis(ego_x, ego_y, junction.get('x'), junction.get('y'))
+            if dis < closet_dis:
+                closet_dis = dis
+        if closet_dis <= 3:
+            return 1
+        else:
+            return 0
     else:
         return 0
 
