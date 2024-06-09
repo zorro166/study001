@@ -1,9 +1,7 @@
 import math
 import os
 import re
-
 import numpy as np
-
 
 def loadlog():
     log_data = None
@@ -12,7 +10,7 @@ def loadlog():
         print("文件夹 'data' 不存在。")
     else:
         # 'data'文件夹存在，检查'myapp1.log'文件是否存在
-        file_path = os.path.join('data', 'myapp6.log')
+        file_path = os.path.join('data', 'myapp6.1.log')
         if not os.path.exists(file_path):
             print("日志文件不存在。")
         else:
@@ -163,7 +161,7 @@ def create_ego_action_vec(frame_obj_list, map):
         vehicle_velocity_value = ego_obj['vehicle_velocity_value']
         vehicle_velocity_value = float(vehicle_velocity_value)
         if pre_speed_value is None:
-            speed_state.append([1, 0 ,0])
+            speed_state.append([1, 0, 0])
         elif vehicle_velocity_value > pre_speed_value:
             speed_state.append([0, 1, 0])
         elif vehicle_velocity_value < pre_speed_value:
@@ -203,8 +201,8 @@ def create_obs_action_vec(frame_obj_list, map, near_distance=5.0):
                 if ego_distance < near_distance:
                     type_id = vehicle_obj.get('vehicle_type')
                     obs_type.append(type_id)
-                    if obs_type_num[obs_type_num] is None:
-                        obs_type_num[obs_type_num] = 0
+                    if type_id not in obs_type_num:
+                        obs_type_num[type_id] = 0
                     obs_type_num[type_id] = obs_type_num[type_id] + 1
 
         for traffic_light_obj in traffic_light_obj_list:
@@ -213,8 +211,8 @@ def create_obs_action_vec(frame_obj_list, map, near_distance=5.0):
                 if ego_distance < near_distance:
                     obs_type.append(traffic_light_obj.get('type_id'))
                     type_id = traffic_light_obj.get('type_id')
-                    if obs_type_num[obs_type_num] is None:
-                        obs_type_num[obs_type_num] = 0
+                    if type_id not in obs_type_num:
+                        obs_type_num[type_id] = 0
                     obs_type_num[type_id] = obs_type_num[type_id] + 1
 
         for traffic_sign_obj in traffic_sign_obj_list:
@@ -223,8 +221,8 @@ def create_obs_action_vec(frame_obj_list, map, near_distance=5.0):
                 if ego_distance < near_distance:
                     obs_type.append(traffic_sign_obj.get("type_id"))
                     type_id = traffic_sign_obj.get('type_id')
-                    if obs_type_num[obs_type_num] is None:
-                        obs_type_num[obs_type_num] = 0
+                    if type_id not in obs_type_num:
+                        obs_type_num[type_id] = 0
                     obs_type_num[type_id] = obs_type_num[type_id] + 1
 
         for pedestrian_obj in  pedestrian_obj_list:
@@ -233,8 +231,8 @@ def create_obs_action_vec(frame_obj_list, map, near_distance=5.0):
                 if ego_distance < near_distance:
                     obs_type.append(pedestrian_obj.get("type_id"))
                     type_id = pedestrian_obj.get('type_id')
-                    if obs_type_num[obs_type_num] is None:
-                        obs_type_num[obs_type_num] = 0
+                    if type_id not in obs_type_num:
+                        obs_type_num[type_id] = 0
                     obs_type_num[type_id] = obs_type_num[type_id] + 1
         # 这一帧的 obs_type
         obs_type_set += obs_type
@@ -294,7 +292,7 @@ def buildMapObj(mapstring):
     crosswalks = []
     for crosswalk_log in crosswalks_log:
         crosswalk_obj = msg2obj(crosswalk_log)
-        if crosswalk_obj.get("x") is not None:
+        if "x" in crosswalk_obj:
             crosswalks.append(crosswalk_obj)
     map_obj['crosswalks'] = crosswalks
     # 处理交叉路口
@@ -303,7 +301,8 @@ def buildMapObj(mapstring):
         junctions = []
         for junction_log in junctions_log:
             junction_obj = msg2obj(junction_log)
-            junctions.append(junction_obj)
+            if "x" not in junction_obj:
+                junctions.append(junction_obj)
         map_obj['junctions'] = junctions
     return map_obj
 
@@ -319,6 +318,7 @@ def buildFrameObjList():
     # 使用 "*" * 80 分离每一帧的数据
     splitflag = "*" * 80
     frams = log_arr[1].split(splitflag)
+    frams = frams[:-1]
     # frams = frams[1:]
     # 用来存储string[]
     frames_msg = []
@@ -326,7 +326,6 @@ def buildFrameObjList():
 
     for fram in frams:
         frame_msg = {}
-
         frame_obj = {}
 
         vehicle_obj_list = []
@@ -361,8 +360,6 @@ def buildFrameObjList():
             dealLocation(obj, "vehicle_location")
             # 是ego还是背景车
             if obj.get('role_name') == 'hero':
-                print('ego:')
-                print(obj)
                 ego_obj_list.append(obj)
             else:
                 vehicle_obj_list.append(obj)
@@ -373,7 +370,8 @@ def buildFrameObjList():
         for tl_msg in tl_msg_arr:
             obj = msg2obj(tl_msg)
             dealLocation(obj, "location")
-            traffic_light_obj_list.append(obj)
+            if "location" in obj:
+                traffic_light_obj_list.append(obj)
         # 处理交通标识
         splitflag = "+" * 50
         ts_msg_arr = ts_msgs.split(splitflag)
@@ -391,9 +389,9 @@ def buildFrameObjList():
 
         # 计算与ego之间的距离
         calc_ego_distance(frame_obj)
-        break
-    print('frames_obj_list:')
-    print(frames_obj_list)
+        # break
+    # print('frames_obj_list:')
+    # print(frames_obj_list)
     return frames_obj_list, map_obj
 
 
@@ -437,6 +435,9 @@ def create_scene_vecs(frame_obj_list, map):
     subsignal_type_vec = []
     for frame_obj in frame_obj_list:
         ego_obj = frame_obj.get('ego_obj_list')[0]
+        traffic_light_obj_list = frame_obj.get('traffic_light_obj_list')
+
+
         # Red
         # Yellow
         # Green
@@ -459,7 +460,7 @@ def create_scene_vecs(frame_obj_list, map):
 
         ego_loc = ego_obj.get('location3d')
         has_crosswalk.append(near_crosswalk(ego_loc, map))
-        has_intersection.append(near_junction(ego_loc, map))
+        has_intersection.append(near_junction(ego_loc, traffic_light_obj_list))
         has_stop_sign.append(0)
 
     signal_color_vec = np.vstack(signal_color_vec)
@@ -479,9 +480,6 @@ def near_crosswalk(ego_loc, map):
     ego_x = ego_loc.get('x')
     ego_y = ego_loc.get('y')
     for crosswalk in crosswalks:
-        # print(lane_polygon)
-        print("crosswalk:")
-        print(crosswalk)
         dis = calc_dis(ego_x, ego_y, crosswalk.get('x'), crosswalk.get('y'))
         if dis < closet_dis:
             closet_dis = dis
@@ -496,7 +494,7 @@ def calc_dis(x0, y0, x1, y1):
     return math.sqrt((float(x1)-float(x0))**2 + (float(y1)-float(y0))**2)
 
 
-def near_junction(ego_loc, map):
+def near_junction_old(ego_loc, map):
     if "junctions" in map:
         junctions = map['junctions']
         ego_x = ego_loc.get('x')
@@ -504,6 +502,24 @@ def near_junction(ego_loc, map):
         ego_y = ego_loc.get('y')
         for junction in junctions:
             dis = calc_dis(ego_x, ego_y, junction.get('x'), junction.get('y'))
+            if dis < closet_dis:
+                closet_dis = dis
+        if closet_dis <= 3:
+            return 1
+        else:
+            return 0
+    else:
+        return 0
+
+
+def near_junction(ego_loc, traffic_light_obj_list):
+    if traffic_light_obj_list:
+        ego_x = ego_loc.get('x')
+        closet_dis = 999999
+        ego_y = ego_loc.get('y')
+        for traffic_light_obj in traffic_light_obj_list:
+            location3d = traffic_light_obj.get("location3d")
+            dis = calc_dis(ego_x, ego_y, location3d.get('x'), location3d.get('y'))
             if dis < closet_dis:
                 closet_dis = dis
         if closet_dis <= 3:
