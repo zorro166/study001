@@ -264,7 +264,7 @@ def create_obs_action_vec(frame_obj_list, map, near_distance=5.0):
 
 
 def record2vec():
-    frame_obj_list, map_obj = buildFrameObjList()
+    frame_obj_list, map_obj = build_frame_obj_list()
     scene_vec = create_scene_vecs(frame_obj_list, map_obj)
     actor_vec = create_actor_vecs(frame_obj_list, map_obj)
     ego_action_vec = create_ego_action_vec(frame_obj_list, map)
@@ -307,7 +307,7 @@ def buildMapObj(mapstring):
     return map_obj
 
 
-def buildFrameObjList():
+def build_frame_obj_list():
     # 1、读取数据，从data文件夹下面读取数据
     log_data = loadlog()
     # 使用 "*" * 90 分离map数据
@@ -346,10 +346,14 @@ def buildFrameObjList():
 
         splitflag = "*" * 70
         msg = fram.split(splitflag)
-        v_msgs = msg[0]
-        tl_msgs = msg[1]
-        ts_msgs = msg[2]
-        pedestrians_msgs = msg[3]
+        t_msg = msg[0]
+        v_msgs = msg[1]
+        tl_msgs = msg[2]
+        ts_msgs = msg[3]
+        pedestrians_msgs = msg[4]
+
+        t_obj = msg2obj(t_msg)
+        frame_obj["time"] = t_obj['time']
 
         # 对汽车进行处理
         splitflag = "-" * 60
